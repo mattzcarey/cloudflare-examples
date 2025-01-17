@@ -1,0 +1,13 @@
+{
+  "name": "@examples/worker-b",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "dev": "wrangler dev --inspector-port 3921 --port 3922",
+    "deploy:worker-b": "wrangler deploy",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {}
+}

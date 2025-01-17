@@ -1,0 +1,12 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "worker-b"
+main = "index.ts"
+compatibility_date = "2024-12-26"
+
+# Workers Logs
+[observability]
+enabled = true
+
+# [placement]
+# mode = "smart"
+

@@ -1,0 +1,23 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "durable-object"
+main = "index.ts"
+compatibility_date = "2024-12-26"
+
+# Workers Logs
+[observability]
+enabled = true
+
+# [placement]
+# mode = "smart"
+
+# Best to name these the same thing so you don't get confused
+[[durable_objects.bindings]]
+# name of the binding in the worker
+name = "ExampleDurableObject"
+# name of your class
+class_name = "ExampleDurableObject"
+
+# Needed for the sqlite database in the DO
+[[migrations]]
+tag = "v1"
+new_classes = ["ExampleDurableObject"]

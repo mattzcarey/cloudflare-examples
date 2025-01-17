@@ -1,0 +1,18 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "worker-a"
+main = "index.ts"
+compatibility_date = "2024-12-26"
+
+# Workers Logs
+[observability]
+enabled = true
+
+# [placement]
+# mode = "smart"
+
+[[services]]
+# the name you bind it to in your worker
+binding = "WorkerB"
+# the exact name of this service in wrangler
+service = "worker-b"
+
