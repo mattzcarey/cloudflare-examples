@@ -1,4 +1,4 @@
-# Cloudflare Worker and Durable Object Monorepo
+# Cloudflare Worker and Durable Object Monorepo Examples
 
 > typesafe and fun
 
@@ -6,20 +6,20 @@
 
 ### Durable Object
 
-- [ ] State persistence
-- [ ] SQLite database
-- [ ] Object storage
-- [ ] WebSocket connection
-- [ ] Request/Response with rpc
+- [x] State persistence
+- [x] SQLite database
+- [x] Object storage
+- [x] WebSocket connection
+- [x] Request/Response with rpc
 
 ### Worker A
 
-- [ ] server using `hono`
-- [ ] rpc communication with Worker B
+- [x] server using `hono`
+- [x] rpc communication with Worker B
 
 ### Worker B
 
-- [ ] worker entrypoint
+- [x] worker entrypoint
 
 ## Mini hacks and bugs
 
