@@ -12,20 +12,21 @@
 - [x] WebSocket connection
 - [x] Request/Response with rpc
 
-### Worker A
+### Worker to Worker
 
-- [x] server using `hono`
-- [x] rpc communication with Worker B
-
-### Worker B
-
-- [x] worker entrypoint
+- [x] worker A server using `hono`
+- [x] rpc communication with worker B
+- [x] worker B uses worker entrypoint
 
 ### Cyclical Worker
 
 - [x] worker entrypoint
 - [x] spawn the same worker recursively
 - [x] make a bunch of outgoing connections in parallel
+
+### TODO: Cyclical Worker to Worker
+
+- [ ] might be an antipattern. Deployment is a pain and will probs need be in two stages. You get an error deploying a worker with a non existent binding.
 
 ## Mini hacks and bugs
 

@@ -1,7 +1,7 @@
 {
   "name": "cloudflare-examples",
   "private": true,
-  "workspaces": ["apps/*"],
+  "workspaces": ["apps/**"],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",

@@ -1,11 +1,12 @@
 import { DurableObject } from 'cloudflare:workers';
+import { Hono } from 'hono';
 
 interface Env {
   ExampleDurableObject: DurableObjectNamespace<ExampleDurableObject>;
 }
 
 interface SomeState {
-  currentlyConnectedWebSockets: number;
+  someKey?: string;
 }
 
 export class ExampleDurableObject extends DurableObject<Env> {
@@ -15,11 +16,13 @@ export class ExampleDurableObject extends DurableObject<Env> {
   };
 
   // create some internal state on the class
-  state: SomeState = {
-    currentlyConnectedWebSockets: 0,
+  internalState: SomeState = {
+    someKey: 'someValue',
   };
 
-  async onStart() {
+  constructor(state: DurableObjectState, env: Env) {
+    super(state, env);
+
     // execute some sql
     this.ctx.storage.sql.exec(`
       CREATE TABLE IF NOT EXISTS some_table (
@@ -29,73 +32,65 @@ export class ExampleDurableObject extends DurableObject<Env> {
         timestamp INTEGER DEFAULT (unixepoch())
       );
     `);
+  }
 
-    // you can also use object storage
-    this.state = (await this.ctx.storage.get('state')) || this.state;
+  // you can also use some object storage to store state
+  async getState() {
+    this.internalState = (await this.ctx.storage.get('state')) || this.internalState;
   }
 
   // requests via rpc are just functions
   async helloWorld(): Promise<string> {
-    return 'hello world';
+    return `hello world from the durable object. id: ${this.ctx.id.toString()}`;
   }
 
   // websocket are better as fetch handlers?
   // https://developers.cloudflare.com/durable-objects/best-practices/websockets/
-  async onConnection(request: Request): Promise<Response> {
+  async fetch(request: Request): Promise<Response> {
+    // Creates two ends of a WebSocket connection.
     const webSocketPair = new WebSocketPair();
     const [client, server] = Object.values(webSocketPair);
 
     this.ctx.acceptWebSocket(server);
-    this.state.currentlyConnectedWebSockets += 1;
-
-    server.addEventListener('message', (event: MessageEvent) => {
-      server.send(
-        `[Durable Object] currentlyConnectedWebSockets: ${this.state.currentlyConnectedWebSockets}. Message: ${event.data}`
-      );
-    });
-
-    server.addEventListener('close', (cls: CloseEvent) => {
-      this.state.currentlyConnectedWebSockets -= 1;
-      server.close(cls.code, 'Durable Object is closing WebSocket');
-    });
 
     return new Response(null, {
       status: 101,
       webSocket: client,
     });
   }
+
+  async webSocketMessage(ws: WebSocket, message: ArrayBuffer | string) {
+    ws.send(
+      `[Durable Object] message: ${message}, connections: ${this.ctx.getWebSockets().length}`
+    );
+  }
+
+  async webSocketClose(ws: WebSocket, code: number, reason: string, wasClean: boolean) {
+    ws.close(code, 'Durable Object is closing WebSocket');
+  }
 }
 
-// TODO: add hono router here.
-export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
-    const url = new URL(request.url);
+const app = new Hono<{ Bindings: Env }>();
 
-    // assume the path is /durable-object/<id>/<endpoint>
-    const path = url.pathname.split('/').filter(Boolean);
+app.get('/', (c) => c.text('Hello from the durable object worker'));
 
-    if (path.length === 0) {
-      return new Response('Hello from the worker durable-object');
-    }
+app.get('/do/new', async (c) => {
+  const doId = c.env.ExampleDurableObject.newUniqueId();
+  return new Response(doId.toString());
+});
 
-    const id = path[1] ?? env.ExampleDurableObject.newUniqueId();
+app.get('/do/:id/hello', async (c) => {
+  const doId = c.env.ExampleDurableObject.idFromString(c.req.param('id'));
+  const stub = c.env.ExampleDurableObject.get(doId);
+  const rpcResponse = await stub.helloWorld();
 
-    // /hello-world
-    if (path.length === 3 && path[2] === 'hello-world') {
-      const name = env.ExampleDurableObject.idFromName(id);
-      const stub = env.ExampleDurableObject.get(name);
-      const rpcResponse = await stub.helloWorld();
+  return new Response(rpcResponse);
+});
 
-      return new Response(rpcResponse);
-    }
+app.get('/do/:id/websocket', async (c) => {
+  const doId = c.env.ExampleDurableObject.idFromString(c.req.param('id'));
+  const stub = c.env.ExampleDurableObject.get(doId);
+  return await stub.fetch(c.req.raw);
+});
 
-    // websocket
-    if (path.length === 3 && path[2] === 'websocket') {
-      const name = env.ExampleDurableObject.idFromName(id);
-      const stub = env.ExampleDurableObject.get(name);
-      return await stub.fetch(request);
-    }
-
-    return new Response('Not Found', { status: 404 });
-  },
-} satisfies ExportedHandler<Env>;
+export default app;

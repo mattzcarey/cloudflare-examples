@@ -6,5 +6,8 @@
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "hono": "^4.6.17"
   }
 }

@@ -1,5 +1,5 @@
-import type WorkerB from '@examples/worker-b';
 import { Hono } from 'hono';
+import type WorkerB from '../worker-b';
 
 const app = new Hono<{ Bindings: Env }>();
 
