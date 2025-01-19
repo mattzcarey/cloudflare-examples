@@ -21,6 +21,12 @@
 
 - [x] worker entrypoint
 
+### Cyclical Worker
+
+- [x] worker entrypoint
+- [x] spawn the same worker recursively
+- [x] make a bunch of outgoing connections in parallel
+
 ## Mini hacks and bugs
 
 Setting the ports for the workers in the dev scripts allows you to run all the workers locally with `npm run dev`.

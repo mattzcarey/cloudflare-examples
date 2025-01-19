@@ -1,0 +1,13 @@
+{
+  "name": "@examples/cyclical-worker",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "dev": "wrangler dev --inspector-port 3925 --port 3926",
+    "deploy:worker-b": "wrangler deploy",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {}
+}
